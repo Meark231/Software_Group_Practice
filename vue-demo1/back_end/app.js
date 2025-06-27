@@ -24,6 +24,8 @@ mongoose.connect('mongodb://localhost:27017/mycesshi', { useNewUrlParser: true, 
 // 解析表单数据
 app.use(bodyParser.json({ limit: '50mb' }));//限制文件大小
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+// 配置会话
 app.use(session({
     secret: 'secret', // 对session id 相关的cookie 进行签名
     resave: true,
@@ -33,15 +35,16 @@ app.use(session({
     }
 }));
 
+// 加载登录验证路由
+app.use('/api/auth', require('../back_end/routes/auth.js'));
 
-app.use('/', require('../back_end/routers/main.js'));
-
+// 根路径请求
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, '../front/ceshi.html')); // sendFile yes 
 })
 
 
-
+// 启动服务器
 app.listen(3000,() => {
     console.log("Server is running on port 3000");
 });
