@@ -1,8 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex items-center justify-center">
-    <h1 class="text-4xl font-bold text-blue-500">
-      Hello, Tailwind CSS!
-    </h1>
+  <div id="app">
+    <!-- 导航栏 -->
+    <nav>
+      <ul>
+        <li><router-link to="/login">登录</router-link></li>
+        <li><router-link to="/register">注册</router-link></li>
+      </ul>
+    </nav>
+
+    <!-- 渲染匹配到的页面 -->
+    <router-view></router-view>
   </div>
 </template>
 
@@ -13,6 +20,44 @@ export default {
 </script>
 
 <style scoped>
-/* 你可以在这里添加一些自定义样式，但大部分都可以用 Tailwind 类来处理 */
+/* 样式自定义 */
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  text-align: center;
+  color: #ffffff;
+  margin-top: 60px;
+}
+
+nav {
+  background-color: #333;
+  padding: 10px;
+  position: sticky;
+  top: 0;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+nav ul li {
+  display: inline;
+  margin-right: 15px;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+.router-link{
+  color:white;
+}
 </style>
+
 
