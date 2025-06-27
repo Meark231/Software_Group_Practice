@@ -56,19 +56,16 @@ export default {
       }
       // 注册逻辑
       try{
-        const res = await axios.post('http://localhost:3000/api/register',{
+        const response = await axios.post('/api/auth/register',{
             username: this.form.username,
-            password: this.form.password
+            password: this.form.password,
+            confirmPassword: this.form.confirmPassword
         });
-        if(res.data.code === 0){
-            this.$message.success('注册成功');
-            this.$router.push({ name: 'Login' });//修改这个
-            } else {
-            this.$message.error(res.data.msg);
-        }
-      }catch(e){
-        this.$message.error('注册失败，请稍后再试');
-        console.error(e);
+
+        this.$message.success(response.data.message || '注册成功');
+        this.$router.push({ name: 'Login' }); 
+      } catch(error){
+            this.$message.error(error.response?.data?.message || '注册失败，请稍后再试');
         }
     }
   }

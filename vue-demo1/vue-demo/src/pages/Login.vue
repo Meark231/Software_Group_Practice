@@ -38,16 +38,21 @@ export default {
     },
     methods: {
         // 登录方法
-        handleLogin() {
+        async handleLogin() {
             // 这里可以添加登录逻辑，比如调用 API 验证用户
-            if (this.form.username && this.form.password) {
-                // 假设登录成功
-                this.$message.success('登录成功');
-                // 跳转到首页或其他页面
-                this.$router.push({ name: 'Home' });
-            } else {
+            if (!this.form.username || !this.form.password) {
                 this.$message.error('请输入账号和密码');
+                return;
             }
+            try{
+              const response = await this.$axios.post('/api/auth/login', {
+                username: this.form.username,
+                password: this.form.password,
+              });
+              this.$message.success('登录成功');
+              this.$router.push('/home'); // 登录成功后跳转到首页或其他页面
+            }catch(error){
+              this.$message.error('登录失败');}
         }
     }
 };
