@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 
 // 用户数据模型
 const userSchema = new mongoose.Schema({
+  uid: { type: Number, unique: true, required: true },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true }, // 存储加密后的密码
 });

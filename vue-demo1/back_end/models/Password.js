@@ -1,4 +1,3 @@
-// /backend/models/Password.js
 const bcrypt = require('bcryptjs');
 
 // 用于加密密码

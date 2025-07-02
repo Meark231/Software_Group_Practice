@@ -50,23 +50,34 @@ export default {
         this.$message.error('请填写所有信息');
         return;
       }
+
       if (this.form.password !== this.form.confirmPassword) {
         this.$message.error('两次输入的密码不一致');
         return;
       }
-      // 注册逻辑
-      try{
-        const response = await axios.post('/api/auth/register',{
-            username: this.form.username,
-            password: this.form.password,
-            confirmPassword: this.form.confirmPassword
+
+      try {
+        const response = await axios.post('/api/auth/register', {
+          username: this.form.username,
+          password: this.form.password,
+          confirmPassword: this.form.confirmPassword
         });
 
-        this.$message.success(response.data.message || '注册成功');
-        this.$router.push({ name: 'Login' }); 
-      } catch(error){
-            this.$message.error(error.response?.data?.message || '注册失败，请稍后再试');
+        if (response.data.code === 0) {
+          // ✅ 保存 uid 和 username
+          const { uid, username } = response.data.data;
+          localStorage.setItem('uid', uid);
+          localStorage.setItem('username', username);
+
+          this.$message.success(response.data.message || '注册成功');
+          // 跳转到登录页
+          this.$router.push({ name: 'Login' });
+        } else {
+          this.$message.error(response.data.message || '注册失败');
         }
+      } catch (error) {
+        this.$message.error(error.response?.data?.message || '注册失败，请稍后再试');
+      }
     }
   }
 }

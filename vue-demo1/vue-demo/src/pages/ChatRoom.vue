@@ -2,12 +2,24 @@
   <div class="chat-container">
     <h2>欢迎，{{ username }}！</h2>
 
+    <!-- 聊天记录显示 -->
     <div class="messages" ref="messageBox">
       <div v-for="(msg, index) in messages" :key="index" class="message">
         <strong>{{ msg.from }}:</strong> {{ msg.text }}
       </div>
     </div>
 
+    <!-- 输入框：用户输入对方的 UID -->
+    <div class="input-box">
+      <el-input
+        v-model="targetUid"
+        placeholder="请输入对方的 UID 开始私聊"
+        style="width: 300px; margin-bottom: 10px;"
+      ></el-input>
+      <el-button type="primary" @click="joinPrivateChat">进入私聊</el-button>
+    </div>
+
+    <!-- 消息发送框 -->
     <div class="input-box">
       <input
         v-model="newMessage"
@@ -16,6 +28,16 @@
       />
       <button @click="sendMessage">发送</button>
     </div>
+
+    <el-button type="primary" @click="createGroupChat">创建群聊</el-button>
+
+    <el-input
+      v-model="targetRoomId"
+      placeholder="请输入群聊ID加入群聊"
+      style="width: 300px; margin-bottom: 10px;"
+    ></el-input>
+    <el-button type="primary" @click="joinGroupChat">加入群聊</el-button>
+
   </div>
 </template>
 
@@ -26,9 +48,13 @@ export default {
   name: 'ChatRoom',
   data() {
     return {
-      username: '',
-      newMessage: '',
-      messages: []
+      username: '',          // 当前用户名
+      uid: localStorage.getItem('uid'),  // 获取当前用户的 UID（通过登录时保存）
+      targetUid: '',         // 目标用户的 UID
+      targetRoomId: '',  // 确保加入群聊输入框绑定的值初始化
+      newMessage: '',        // 新消息
+      messages: [],          // 当前房间的消息
+      currentRoomId: ''      // 当前房间的 roomId
     };
   },
   mounted() {
@@ -40,35 +66,75 @@ export default {
 
     // 接收消息
     socket.on('receiveMessage', (msg) => {
-      this.messages.push(msg);
-      this.$nextTick(() => {
-        this.scrollToBottom();
-      });
+      if (msg.roomId === this.currentRoomId) {
+        this.messages.push(msg);
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
+      }
     });
   },
   methods: {
+    // 加入私聊房间，根据 uid 生成 roomId
+    joinPrivateChat() {
+      if (!this.uid || !this.targetUid) return;
+
+      // 构造 roomId（根据 uid 排序确保唯一性）
+      const uidA = Number(this.uid);
+      const uidB = Number(this.targetUid);
+      const sorted = [uidA, uidB].sort((a, b) => a - b);  // 字典序排序
+      this.currentRoomId = `room_${sorted[0]}_${sorted[1]}`;
+
+      socket.emit('joinRoom', this.currentRoomId);  // 加入房间
+      this.messages = [];  // 清空旧消息
+      this.$message.success(`已进入私聊房间 ${this.currentRoomId}`);
+    },
+
+    // 发送消息
     sendMessage() {
       if (!this.newMessage.trim()) return;
 
       const msg = {
-        from: this.username,
-        text: this.newMessage
+        roomId: this.currentRoomId,  // 当前群聊房间 id
+        from: this.username,         // 当前用户的 username
+        text: this.newMessage,       // 消息内容
+        time: new Date()             // 时间戳
       };
 
-      // 发给服务器
-      socket.emit('sendMessage', msg);
-
-      //自己发的消息，就让它等广播回来时统一处理，不再提前显示一次。
-      //不然会出现自己发的消息显示两次的情况。
-      
-      //this.messages.push(msg);  
-      
-      this.newMessage = '';
+      socket.emit('sendMessage', msg);  // 发送消息到群聊
+      this.newMessage = '';  // 清空输入框
 
       this.$nextTick(() => {
         this.scrollToBottom();
       });
     },
+
+
+    async createGroupChat() {
+      if (!this.username) return;
+
+      // 请求后端创建群聊
+      socket.emit('createGroupChat', this.username);
+
+      socket.on('groupChatCreated', (data) => {
+        this.currentRoomId = data.roomId;  // 获取新的群聊 ID
+        this.$message.success(`群聊 ${data.roomId} 创建成功`);
+        console.log(`群聊 ID: ${data.roomId} 创建成功`); // 添加控制台日志帮助调试
+      });
+    },
+
+    joinGroupChat() {
+      if (!this.targetRoomId) return;
+
+      // 加入指定的群聊房间
+      socket.emit('joinRoom', this.targetRoomId);
+      this.currentRoomId = this.targetRoomId;
+      this.messages = [];  // 清空消息
+
+      this.$message.success(`已加入群聊房间 ${this.currentRoomId}`);
+    },
+
+    // 滚动到最底部
     scrollToBottom() {
       const box = this.$refs.messageBox;
       box.scrollTop = box.scrollHeight;
@@ -111,3 +177,5 @@ button {
   font-size: 16px;
 }
 </style>
+
+

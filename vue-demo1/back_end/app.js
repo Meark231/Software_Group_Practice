@@ -17,6 +17,8 @@ let io = new Server(server, {
   }
 });
 
+let currentRoomId = 10000; // 初始群聊 ID 从 10000 开始
+
 // 原有配置不变
 app.use(cors({
   origin: ['http://localhost:8080', 'http://10.138.194.217:8080'],
@@ -58,9 +60,24 @@ io.on('connection', (socket) => {
     console.log(`${username} 登录了，Socket ID: ${socket.id}`);
   });
 
+  // 加入房间
+  socket.on('joinRoom', (roomId) => {
+    socket.join(roomId);  // 加入指定房间
+    console.log(`用户 ${socket.id} 加入了房间 ${roomId}`);
+  });
+
+  // 创建新群聊
+  socket.on('createGroupChat', (username) => {
+    const newRoomId = currentRoomId++;  // 生成新的群聊 ID
+    socket.join(newRoomId);  // 用户加入新的群聊
+    console.log(`${username} 创建了群聊，房间ID: ${newRoomId}`);
+    io.to(newRoomId).emit('groupChatCreated', { roomId: newRoomId, username });
+  });
+
+  // 发送消息
   socket.on('sendMessage', (msg) => {
     console.log('收到消息:', msg);
-    io.emit('receiveMessage', msg); // 广播给所有连接用户
+    io.to(msg.roomId).emit('receiveMessage', msg);  // 只广播到该房间
   });
 
   socket.on('disconnect', () => {
