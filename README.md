@@ -80,7 +80,7 @@
 
 <img width="1000" src="https://github.com/Meark231/Software_Group_Practice/blob/main/README-PIC/AI%E8%81%8A%E5%A4%A9%E7%95%8C%E9%9D%A2.png"/>
 
-<img width="1000" src="https://github.com/Meark231/Software_Group_Practice/blob/main/README-PIC/AI%E8%81%8A%E5%A4%A9%E7%95%8C%E9%9D%A2.png"/>
+<img width="1000" src="https://github.com/Meark231/Software_Group_Practice/blob/main/README-PIC/AI%E8%81%8A%E5%A4%A9%E7%95%8C%E9%9D%A22.png"/>
 
 ### ⚙️ 已实现功能
 
