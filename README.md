@@ -125,7 +125,6 @@ net start MongoDB
 在 **back_end** 文件目录下
 
 ```
-
 npm install
 node app.js
 ```
